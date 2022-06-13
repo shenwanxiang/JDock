@@ -1,18 +1,18 @@
 Receptor
-1AZ8_clean_H.pdb
+pro.pdb
 
 RMSD
 1.0
 
 Binding pocket
-19.57430076599121 44.143798828125
-4.285799980163574 22.409099578857422
-8.378700256347656 25.75309944152832
+xmin xmax
+ymin ymax
+zmin zmax
 
 Number of binding poses
-10
+20
 
 Ligands list
-ledock_ligand.list1
+ligands
 
 END

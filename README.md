@@ -125,7 +125,8 @@ conda install -c conda-forge pdbfixer
 
 To achieve a successful installation, the current development of ProLif necessitates a number of dependencies and steps. The quickest way to get a fully functional ProLif is to follow the steps below:
 ```
-conda install rdkit cython
+conda install cython
+conda install -c conda-forge rdkit==2022.03.2
 ```
 Make sure your system has a working GCC before beginning the ProLif installation (needed to compile MDAnalysis).
 ```
@@ -137,6 +138,14 @@ pip install git+https://github.com/chemosim-lab/ProLIF.git
 > It is highly likely that the AutoDock Tools binaries will need to be compiled on your machine before they can be used. In this case, you must download them from https://ccsb.scripps.edu/adfr/downloads/ and then follow the installation instructions.
 
 To address this limitation, the notebooks include the use of Smina binary as an alternative to AutoDock Vina, which offers several advantages for protein and ligand preration and formats, among other things.
+```
+wget https://ccsb.scripps.edu/adfr/download/1038/ -o ./ADFRsuite_x86_64Linux_1.0.tar.gz
+tar zxvf ADFRsuite_x86_64Linux_1.0.tar.gz
+cd ADFRsuite_x86_64Linux_1.0
+./install.sh -d /home/shenwanxiang/ADFRsuite-1.0/ -c 0
+export PATH=/home/shenwanxiang/ADFRsuite-1.0/bin:$PATH
+```
+
 
 
 **2. Available as GitHub repo:**
