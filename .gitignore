@@ -14,6 +14,8 @@ paper.old
 *.xlsx
 *.mp
 *.svg
+*.pyc
+*.pyo
 
 
 

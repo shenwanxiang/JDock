@@ -143,7 +143,9 @@ wget https://ccsb.scripps.edu/adfr/download/1038/ -o ./ADFRsuite_x86_64Linux_1.0
 tar zxvf ADFRsuite_x86_64Linux_1.0.tar.gz
 cd ADFRsuite_x86_64Linux_1.0
 ./install.sh -d /home/shenwanxiang/ADFRsuite-1.0/ -c 0
-export PATH=/home/shenwanxiang/ADFRsuite-1.0/bin:$PATH
+cd /home/shenwanxiang/ADFRsuite-1.0/bin
+echo export PATH="\$PATH:`pwd`" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 
