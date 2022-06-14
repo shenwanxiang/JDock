@@ -14,6 +14,35 @@ from MDAnalysis.coordinates import PDB
 import random, math
 
 import numpy as np
+import pandas as pd
+from rdkit.Geometry import Point3D
+
+
+def get3DfromSMI(smi, anchor_postion = None, mmffVariant='MMFF94', maxIters = 1000, **kwargs):
+    '''
+    smi: smiles string
+    anchor_postion: reference position: (x, y, z)
+    '''
+    mol = Chem.MolFromSmiles(smi)
+    mol = Chem.AddHs(mol)
+    Chem.AllChem.EmbedMolecule(mol, randomSeed = 123)
+    Chem.AllChem.MMFFOptimizeMolecule(mol, mmffVariant=mmffVariant, maxIters=maxIters, **kwargs)
+    AllChem.ComputeGasteigerCharges(mol)
+    if not (anchor_postion is None):
+        x, y, z = anchor_postion
+        xyz = mol.GetConformer().GetPositions()
+        df = pd.DataFrame(xyz, columns=['x', 'y', 'z'])
+        # shift on x, y, z
+        df.x = df.x + x - df.x.mean() 
+        df.y = df.y + y - df.y.mean()
+        df.z = df.z + z - df.z.mean()
+        conf = mol.GetConformer()
+        new_atom_ps = df.values
+        for i in range(mol.GetNumAtoms()):
+            x,y,z = new_atom_ps[i]
+            conf.SetAtomPosition(i,Point3D(x,y,z))
+    return mol
+
 
 def getbox(selection='sele', extending = 6.0, software='vina'):
     
@@ -108,7 +137,7 @@ def generate_ledock_file(receptor='pro.pdb',rmsd=1.0,x=[0,0],y=[0,0],z=[0,0], n_
 
 
 
-def dok_to_sdf (dok_file=None,output=None):
+def dok_to_sdf(dok_file, output):
 
     """
     dok_to_sdf ( dok_file=None, output=None )
@@ -120,31 +149,21 @@ def dok_to_sdf (dok_file=None,output=None):
     output: str or path-like ; outfile from ledock docking, extension must be sdf
 
    """
-    out=pybel.Outputfile(filename=output,format='sdf',overwrite=True)
-
     with open(dok_file, 'r') as f:
         doc=[line for line in f.readlines()]
-    
     doc=[line.replace(line.split()[2],line.split()[2].upper()) if 'ATOM' in line else line for line in doc]
-    
     start=[index for (index,p) in enumerate(doc) if 'REMARK Cluster' in p]
     finish=[index-1 for (index,p) in enumerate(doc) if 'REMARK Cluster' in p]
     finish.append(len(doc))
-
     interval=list(zip(start,finish[1:]))
-    for num,i in enumerate(interval):
-        block = ",".join(doc[i[0]:i[1]]).replace(',','')
-
-        m=pybel.readstring(format='pdb',string=block)
-        
-        m.data.update({'Pose':m.data['REMARK'].split()[4]})
-        m.data.update({'Score':m.data['REMARK'].split()[6]})
-        del m.data['REMARK']
-
-        out.write(m)
-
-    out.close()
-  
+    with pybel.Outputfile(filename=output,format='sdf',overwrite=True) as out:
+        for num,i in enumerate(interval):
+            block = ",".join(doc[i[0]:i[1]]).replace(',','')
+            m=pybel.readstring(format='pdb',string=block)
+            m.data.update({'Pose':m.data['REMARK'].split()[4]})
+            m.data.update({'Score':m.data['REMARK'].split()[6]})
+            del m.data['REMARK']
+            out.write(m)
 
 def pdbqt_to_sdf(pdbqt_file=None,output=None):
 
@@ -160,7 +179,7 @@ def pdbqt_to_sdf(pdbqt_file=None,output=None):
     out.close()
 
 
-def get_inplace_rmsd (ref,target):
+def get_inplace_rmsd(ref,target):
     
     r=rdFMCS.FindMCS([ref,target])
     
